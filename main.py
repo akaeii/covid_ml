@@ -4,6 +4,9 @@ from sklearn.svm import LinearSVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, GridSearchCV
+import warnings
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 def read_data() -> pd.DataFrame:
