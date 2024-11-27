@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 
 
 def read_data() -> pd.DataFrame:
@@ -65,29 +65,37 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[:, "DATE_DIED"] = np.where(df.loc[:, "DATE_DIED"] == "9999-99-99", 0, 1)
     df = df.rename(columns={"DATE_DIED": "PATIENT_SURVIVAL"})
 
-    df = df.dropna()
+    df = df.dropna().astype("int")
 
     return df
 
 
-def train_model(df):
-    y = df.pop("PATIENT_SURVIVAL").astype("int")
-    X = df
+def train_model(X, y):
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.33, random_state=42
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+
+    parameters = {"loss": ["hinge", "squared_hinge"]}  # try other hyperparams
+
+    pipeline = make_pipeline(
+        StandardScaler(),
+        GridSearchCV(LinearSVC(tol=1e-5), parameters, verbose=1),
     )
 
-    clf = make_pipeline(
-        StandardScaler(), LinearSVC(random_state=0, tol=1e-5, verbose=1)
-    )
-    clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
-    print(f"Score of the classifier: {score}")
+    pipeline.fit(X_train, y_train)
+
+    print(pipeline["gridsearchcv"].cv_results_)
+
+    # score = clf.score(X_test, y_test)
+    # print(f"Score of the classifier: {score}")
 
 
 if __name__ == "__main__":
     df = read_data()
     df = preprocess_data(df)
+    y = df.pop("PATIENT_SURVIVAL").astype("int")
+    X = df
 
-    train_model(df)
+    train_model(X, y)
+
+    # for i in range(6):
+    #     train_model(X, y)
