@@ -56,8 +56,11 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
 
     df.loc[:, bool_columns] = df.loc[:, bool_columns].replace(2, 0)
     df.loc[:, bool_columns] = df.loc[:, bool_columns].replace(97, np.nan)
+    df.loc[:, bool_columns] = df.loc[:, bool_columns].replace(98, np.nan)
     df.loc[:, bool_columns] = df.loc[:, bool_columns].replace(99, np.nan)
     df.loc[:, "DATE_DIED"] = np.where(df.loc[:, "DATE_DIED"] == "9999-99-99", 0, 1)
+
+    df = df.dropna()
 
     return df
 
